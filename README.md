@@ -12,7 +12,7 @@ Pull the Docker container and expose container port 1025 along with envvars for 
 
 Docker:
 ```shell
-docker run --rm -it -p 1025:1025 -e APP_PAPERLESSBASEURL=https://paperless.example.com -e APP_PAPERLESSUSERNAME=example -e APP_PAPERLESSPASSWORD=hunter2 vondruska/smtp-to-paperless
+docker run --rm -it -p 1025:1025 -e APP_PAPERLESSBASEURL=https://paperless.example.com -e APP_PAPERLESSUSERNAME=example -e APP_PAPERLESSPASSWORD=hunter2 ghcr.io/vondruska/smtp-to-paperless:main
 ```
 
 Docker Compose:
@@ -22,7 +22,7 @@ version: "3"
 
 services:
   smtp-to-paperless:
-    image: vondruska/smtp-to-paperless
+    image: ghcr.io/vondruska/smtp-to-paperless:main
     environment:
       - APP_PAPERLESSBASEURL=https://paperless.example.com
       - APP_PAPERLESSUSERNAME=example
