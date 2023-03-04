@@ -18,7 +18,7 @@ namespace SmtpToPaperless
         }
         public async override Task<SmtpResponse> SaveAsync(ISessionContext context, IMessageTransaction transaction, ReadOnlySequence<byte> buffer, CancellationToken cancellationToken)
         {
-            _logger.LogInformation("Got message from {0}", transaction.From);
+            _logger.LogInformation("Got message from {0}", $"{transaction.From.User}@{transaction.From.Host}");
             try
             {
                 await using var stream = new MemoryStream();
