@@ -33,10 +33,22 @@ services:
 
 ## Configuration 
 
-Configuration is done with environment variables
+Configuration is done with environment variables or by a settings.json file. 
+
+Environment variables names must be prefixed with "APP_" (case insensitive) then the key below. For example, for the Paperless Base URL, you'll need an envvar key of `APP_PAPERLESSBASEURL`.
+
+A JSON file named `settings.json` will also be read. An example file looks like:
+
+```json
+{
+  "PaperlessBaseUrl": "https://paperless.example.com"
+}
+```
+
+If a key exists in both the environment variable and json configuration, the environment variable wins.
 
 | Variable Name         | Description |
 | --------------------- | ----------- |
-| APP_PAPERLESSBASEURL  | Base url for your instance of Paperless. For example, https://paperless.example.com       |
-| APP_PAPERLESSUSERNAME | Username to use to authenticate with Paperless        |
-| APP_PAPERLESSPASSWORD | Password to use to authenticate with Paperless            |
+| PaperlessBaseUrl  | Base url for your instance of Paperless. For example, https://paperless.example.com       |
+| PaperlessUsername | Username to use to authenticate with Paperless        |
+| PaperlessPassword | Password to use to authenticate with Paperless            |

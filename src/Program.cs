@@ -1,5 +1,7 @@
 ﻿// See https://aka.ms/new-console-template for more information
 //Console.WriteLine("Hello, World!");
+using System.Net.Http.Headers;
+using System.Text;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -20,18 +22,30 @@ namespace SmtpToPaperless
                 .ConfigureHostConfiguration(hostConfig =>
                 {
                     hostConfig.SetBasePath(Directory.GetCurrentDirectory());
-                    hostConfig.AddJsonFile("hostsettings.json", optional: true);
-                    hostConfig.AddEnvironmentVariables(prefix: "APP_");
+                    hostConfig.AddJsonFile("settings.json", optional: true);
+                    hostConfig.AddEnvironmentVariables(prefix: "App_");
                     hostConfig.AddCommandLine(args);
                 })
                 .ConfigureServices(
                     (hostContext, services) =>
                     {
-                        services.Configure<Configuration>(hostContext.Configuration.GetSection("App"));
+                        services.Configure<Configuration>(hostContext.Configuration.GetSection(""));
                         services.AddTransient<IMessageStore, PaperlessMessageStore>();
                         services.AddSingleton<IPaperlessClient, PaperlessClient>();
 
-                        services.AddHttpClient();
+                        services.AddHttpClient("Paperless", configure =>
+                        {
+                            configure.BaseAddress = new Uri(hostContext.Configuration["PaperlessBaseUrl"]);
+
+                            var username = hostContext.Configuration["PaperlessUsername"];
+                            var password = hostContext.Configuration["PaperlessPassword"];
+
+                            if (!String.IsNullOrEmpty(username))
+                            {
+                                configure.DefaultRequestHeaders.Authorization =
+                                    new AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.UTF8.GetBytes($"{username}:{password}")));
+                            }
+                        });
 
                         services.AddSingleton(
                             provider =>
