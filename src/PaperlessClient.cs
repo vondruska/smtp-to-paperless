@@ -15,6 +15,10 @@ namespace SmtpToPaperless
 
         public async Task UploadFileAsync(string fileName, Stream fileToUpload, CancellationToken cancellationToken)
         {
+            if (fileToUpload.CanSeek)
+            {
+                fileToUpload.Position = 0;
+            }
             using var request = new HttpRequestMessage(HttpMethod.Post, "/api/documents/post_document/");
             request.Content = new MultipartFormDataContent
             {
