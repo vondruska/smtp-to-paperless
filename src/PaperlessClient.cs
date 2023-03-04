@@ -11,9 +11,6 @@ namespace SmtpToPaperless
         public PaperlessClient(IHttpClientFactory httpClientFactory, IOptions<Configuration> options, ILogger<PaperlessClient> logger)
         {
             _httpClient = httpClientFactory.CreateClient("Paperless");
-            
-
-            logger.LogInformation("Using {0} with username {1}", options.Value.PaperlessBaseUrl, options.Value.PaperlessUsername);
         }
 
         public async Task UploadFileAsync(string fileName, Stream fileToUpload, CancellationToken cancellationToken)
