@@ -1,5 +1,6 @@
 ﻿// See https://aka.ms/new-console-template for more information
 //Console.WriteLine("Hello, World!");
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using SmtpServer;
@@ -16,9 +17,17 @@ namespace SmtpToPaperless
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
+                .ConfigureHostConfiguration(hostConfig =>
+                {
+                    hostConfig.SetBasePath(Directory.GetCurrentDirectory());
+                    hostConfig.AddJsonFile("hostsettings.json", optional: true);
+                    hostConfig.AddEnvironmentVariables(prefix: "APP_");
+                    hostConfig.AddCommandLine(args);
+                })
                 .ConfigureServices(
                     (hostContext, services) =>
                     {
+                        services.Configure<Configuration>(hostContext.Configuration.GetSection("App"));
                         services.AddTransient<IMessageStore, PaperlessMessageStore>();
                         services.AddSingleton<IPaperlessClient, PaperlessClient>();
 
@@ -29,7 +38,7 @@ namespace SmtpToPaperless
                             {
                                 var options = new SmtpServerOptionsBuilder()
                                     .ServerName("SMTP Server")
-                                    .Port(25)
+                                    .Port(1025)
                                     .Build();
 
                                 return new SmtpServer.SmtpServer(options, provider.GetRequiredService<IServiceProvider>());
@@ -37,5 +46,6 @@ namespace SmtpToPaperless
 
                         services.AddHostedService<Worker>();
                     });
+
     }
 }

@@ -18,6 +18,7 @@ namespace SmtpToPaperless
         }
         public async override Task<SmtpResponse> SaveAsync(ISessionContext context, IMessageTransaction transaction, ReadOnlySequence<byte> buffer, CancellationToken cancellationToken)
         {
+            _logger.LogInformation("Got message from {0}", transaction.From);
             try
             {
                 await using var stream = new MemoryStream();
@@ -31,6 +32,8 @@ namespace SmtpToPaperless
                 stream.Position = 0;
 
                 var message = await MimeKit.MimeMessage.LoadAsync(stream, cancellationToken);
+
+                _logger.LogInformation("Message has {0} attachments", message.Attachments.Count());
 
                 foreach (var attachment in message.Attachments)
                 {
