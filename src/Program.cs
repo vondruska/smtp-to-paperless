@@ -2,6 +2,7 @@
 //Console.WriteLine("Hello, World!");
 using System.Net.Http.Headers;
 using System.Text;
+using MailKit.Net.Smtp;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -29,8 +30,21 @@ namespace SmtpToPaperless
                 .ConfigureServices(
                     (hostContext, services) =>
                     {
-                        services.Configure<Configuration>(hostContext.Configuration.GetSection(""));
+                        services.Configure<Configuration>(c =>
+                        {
+                            c.PaperlessBaseUrl = new Uri(hostContext.Configuration["PaperlessBaseUrl"]);
+                            c.PaperlessPassword = hostContext.Configuration["PaperlessPassword"];
+                            c.PaperlessUsername = hostContext.Configuration["PaperlessUsername"];
+                            c.RelayFor = hostContext.Configuration["RelayFor"];
+                            c.RelayHost = hostContext.Configuration["RelayHost"];
+                            c.RelayPassword = hostContext.Configuration["RelayPassword"];
+                            c.RelayUsername = hostContext.Configuration["RelayUsername"];
+                        });
+
                         services.AddTransient<IMessageStore, PaperlessMessageStore>();
+                        services.AddSingleton<IMessageHandler, MessageHandler>();
+                        services.AddSingleton<ISmtpRelayClient, SmtpRelayClient>();
+                        services.AddTransient<ISmtpClient, SmtpClient>();
                         services.AddSingleton<IPaperlessClient, PaperlessClient>();
 
                         services.AddHttpClient("Paperless", configure =>

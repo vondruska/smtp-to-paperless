@@ -1,6 +1,5 @@
 using System.Buffers;
 using Microsoft.Extensions.Logging;
-using MimeKit;
 using SmtpServer;
 using SmtpServer.Protocol;
 using SmtpServer.Storage;
@@ -9,12 +8,12 @@ namespace SmtpToPaperless
 {
     public class PaperlessMessageStore : MessageStore
     {
-        private readonly IPaperlessClient _paperlessClient;
+        private readonly IMessageHandler _messageHandler;
         private readonly ILogger<PaperlessMessageStore> _logger;
-        public PaperlessMessageStore(IPaperlessClient paperlessClient, ILogger<PaperlessMessageStore> logger)
+        public PaperlessMessageStore(IMessageHandler handler, ILogger<PaperlessMessageStore> logger)
         {
-            _paperlessClient = paperlessClient ?? throw new ArgumentNullException(nameof(paperlessClient));
             _logger = logger;
+            _messageHandler = handler;
         }
         public async override Task<SmtpResponse> SaveAsync(ISessionContext context, IMessageTransaction transaction, ReadOnlySequence<byte> buffer, CancellationToken cancellationToken)
         {
@@ -33,18 +32,8 @@ namespace SmtpToPaperless
 
                 var message = await MimeKit.MimeMessage.LoadAsync(stream, cancellationToken);
 
-                _logger.LogInformation("Message has {0} attachments", message.Attachments.Count());
+                await _messageHandler.HandleMessageAsync(message, cancellationToken);
 
-                foreach (var attachment in message.Attachments)
-                {
-                    using var attachmentStream = new MemoryStream();
-                    if (attachment is MimePart)
-                        ((MimePart)attachment).Content.DecodeTo(attachmentStream);
-                    else
-                        ((MessagePart)attachment).Message.WriteTo(attachmentStream);
-
-                    await _paperlessClient.UploadFileAsync(attachment.ContentDisposition.FileName, attachmentStream, cancellationToken);
-                }
                 return SmtpResponse.Ok;
             }
             catch (Exception ex)
@@ -52,7 +41,6 @@ namespace SmtpToPaperless
                 _logger.LogError(ex, "Failed to process incoming message");
                 return SmtpResponse.TransactionFailed;
             }
-
         }
     }
 }
