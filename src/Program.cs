@@ -53,8 +53,15 @@ namespace SmtpToPaperless
 
                             var username = hostContext.Configuration["PaperlessUsername"];
                             var password = hostContext.Configuration["PaperlessPassword"];
+                            var token = hostContext.Configuration["PaperlessToken"];
 
-                            if (!String.IsNullOrEmpty(username))
+                            if (!String.IsNullOrEmpty(token))
+                            {
+                                configure.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Token", token);
+
+                            }
+
+                            else if (!String.IsNullOrEmpty(username))
                             {
                                 configure.DefaultRequestHeaders.Authorization =
                                     new AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.UTF8.GetBytes($"{username}:{password}")));

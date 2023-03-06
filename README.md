@@ -31,6 +31,9 @@ services:
       - 1025:1025
 ```
 
+## SMTP Relay
+This service supports SMTP Relaying when a message is sent to a specifically configured email addresses. When the service sees a message going to a configured `RelayFor` email address, it will connect to the SMTP relay which can send the message onto the correct mailbox.
+
 ## Configuration 
 
 Configuration is done with environment variables or by a settings.json file. 
@@ -47,8 +50,23 @@ A JSON file named `settings.json` will also be read. An example file looks like:
 
 If a key exists in both the environment variable and json configuration, the environment variable wins.
 
-| Variable Name         | Description |
+
+### Paperless
+
+| Configuration Key     | Description |
 | --------------------- | ----------- |
 | PaperlessBaseUrl  | Base url for your instance of Paperless. For example, https://paperless.example.com       |
 | PaperlessUsername | Username to use to authenticate with Paperless        |
 | PaperlessPassword | Password to use to authenticate with Paperless            |
+| PaperlessToken    | Paperless authentication token. You'll likely need either username/password, or a token. |
+
+### Relaying
+
+| Configuration Key     | Description |
+| --------------------- | ----------- |
+| RelayFor              | Comma separated list of email addresses the service will relay email for |
+| RelayHost             | SMTP host that a message should be relayed on if it matches `RelayFor` |
+| RelayPort             | The SMTP port to relay the message on. Defaults to 587. |
+| RelayUsername         | Username to authenticate to the relayed SMTP server |
+| RelayPassword         | Password to authenticate to the relayed SMTP server |
+| RelayFrom             | Many SMTP servers will require messages come from an approved sender or domain. When set, the `From` headers will be set to this address regardless of what comes from the scanner.
