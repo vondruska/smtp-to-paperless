@@ -10,12 +10,17 @@
             "request": "launch",
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/bin/Debug/net7.0/smtp-to-paperless.dll",
+            "program": "${workspaceFolder}/src/bin/Debug/net7.0/smtp-to-paperless.dll",
             "args": [],
             "cwd": "${workspaceFolder}",
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
             "console": "internalConsole",
-            "stopAtEntry": false
+            "stopAtEntry": false,
+            "env": {
+                "APP_RELAYFOR": "test@test.com,test2@test.com",
+                "APP_RELAYHOST": "smtp.example.com",
+                "APP_PAPERLESSBASEURL": "https://httpstat.us/200"
+            }
         },
         {
             "name": ".NET Core Attach",
