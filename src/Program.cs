@@ -30,16 +30,10 @@ namespace SmtpToPaperless
                 .ConfigureServices(
                     (hostContext, services) =>
                     {
-                        services.Configure<Configuration>(c =>
-                        {
-                            c.PaperlessBaseUrl = new Uri(hostContext.Configuration["PaperlessBaseUrl"]);
-                            c.PaperlessPassword = hostContext.Configuration["PaperlessPassword"];
-                            c.PaperlessUsername = hostContext.Configuration["PaperlessUsername"];
-                            c.RelayFor = hostContext.Configuration["RelayFor"];
-                            c.RelayHost = hostContext.Configuration["RelayHost"];
-                            c.RelayPassword = hostContext.Configuration["RelayPassword"];
-                            c.RelayUsername = hostContext.Configuration["RelayUsername"];
-                        });
+                        var configuration = new Configuration();
+                        hostContext.Configuration.Bind(configuration);
+
+                        services.Configure<Configuration>(c => hostContext.Configuration.Bind(c));
 
                         services.AddTransient<IMessageStore, PaperlessMessageStore>();
                         services.AddSingleton<IMessageHandler, MessageHandler>();
@@ -51,9 +45,9 @@ namespace SmtpToPaperless
                         {
                             configure.BaseAddress = new Uri(hostContext.Configuration["PaperlessBaseUrl"]);
 
-                            var username = hostContext.Configuration["PaperlessUsername"];
-                            var password = hostContext.Configuration["PaperlessPassword"];
-                            var token = hostContext.Configuration["PaperlessToken"];
+                            var username = configuration.PaperlessUsername;
+                            var password = configuration.PaperlessPassword;
+                            var token = configuration.PaperlessToken;
 
                             if (!String.IsNullOrEmpty(token))
                             {
