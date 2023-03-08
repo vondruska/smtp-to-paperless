@@ -2,6 +2,7 @@
 //Console.WriteLine("Hello, World!");
 using System.Net.Http.Headers;
 using System.Text;
+using MailKit.Net.Smtp;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -29,18 +30,32 @@ namespace SmtpToPaperless
                 .ConfigureServices(
                     (hostContext, services) =>
                     {
-                        services.Configure<Configuration>(hostContext.Configuration.GetSection(""));
+                        var configuration = new Configuration();
+                        hostContext.Configuration.Bind(configuration);
+
+                        services.Configure<Configuration>(c => hostContext.Configuration.Bind(c));
+
                         services.AddTransient<IMessageStore, PaperlessMessageStore>();
+                        services.AddSingleton<IMessageHandler, MessageHandler>();
+                        services.AddSingleton<ISmtpRelayClient, SmtpRelayClient>();
+                        services.AddTransient<ISmtpClient, SmtpClient>();
                         services.AddSingleton<IPaperlessClient, PaperlessClient>();
 
                         services.AddHttpClient("Paperless", configure =>
                         {
                             configure.BaseAddress = new Uri(hostContext.Configuration["PaperlessBaseUrl"]);
 
-                            var username = hostContext.Configuration["PaperlessUsername"];
-                            var password = hostContext.Configuration["PaperlessPassword"];
+                            var username = configuration.PaperlessUsername;
+                            var password = configuration.PaperlessPassword;
+                            var token = configuration.PaperlessToken;
 
-                            if (!String.IsNullOrEmpty(username))
+                            if (!String.IsNullOrEmpty(token))
+                            {
+                                configure.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Token", token);
+
+                            }
+
+                            else if (!String.IsNullOrEmpty(username))
                             {
                                 configure.DefaultRequestHeaders.Authorization =
                                     new AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.UTF8.GetBytes($"{username}:{password}")));

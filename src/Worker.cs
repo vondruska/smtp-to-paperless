@@ -15,5 +15,12 @@ namespace SmtpToPaperless
         {
             return _smtpServer.StartAsync(stoppingToken);
         }
+
+        public override Task StopAsync(CancellationToken cancellationToken)
+        {
+            _smtpServer.Shutdown();
+
+            return base.StopAsync(cancellationToken);
+        }
     }
 }

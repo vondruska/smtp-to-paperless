@@ -9,8 +9,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Mailkit" Version="3.6.0" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="7.0.0" />
-    <PackageReference Include="MimeKit" Version="3.5.0" />
     <PackageReference Include="SmtpServer" Version="9.0.2" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="3.1.6" />
   </ItemGroup>
